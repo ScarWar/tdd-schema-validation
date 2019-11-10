@@ -1,0 +1,102 @@
+// First implentation (Befor refactor)
+export class Siv1 {
+	public static any() {
+		return {
+			validate(data) {
+				return {
+					valid: true
+				};
+			};
+		};
+	}
+}
+
+// First Implementation (After refactor)
+export class Siv2 {
+	public static any() {
+		return new AnyValidator();
+	}
+}
+
+interface ValidationResult {
+	valid: boolean;
+}
+
+
+class AnyValidator {
+	validate(data: any): ValidationResult {
+		return {
+			valid: true
+		};
+	}
+}
+
+// Second Implementation (Before refactor)
+export class Siv3 {
+	public static any() {
+		return new AnyValidator();
+	}
+
+	public static equals(data: any) {
+		return {
+			validate(otherData) {
+				return { valid: data === otherData };
+			}
+		}
+	}
+}
+
+// Second Implementation (After refactor)
+
+interface Validator {
+	validate(data: any): ValidationResult
+}
+
+class AnyValidator2 implements Validator {
+	validate(data: any): ValidationResult {
+		return {
+			valid: true
+		};
+	}
+}
+
+class EqualsValidator2 implements Validator {
+	constructor(private _value: any) { }
+	validate(data: any): ValidationResult {
+		const isValid = data === this._value
+		return {
+			valid: isValid
+		};
+	}
+}
+
+export class Siv {
+	public static any() {
+		return new AnyValidator();
+	}
+
+	public static equals(value: any) {
+		return new EqualsValidator2(value);
+	}
+
+	public static object(object: any) {
+		return new ObjectValidator2(object);
+	}
+}
+
+// First new test object
+class ObjectValidator2 implements Validator {
+	constructor(private _object) {
+	}
+	validate(data: any) {
+		if (Array.isArray(data) || data === null) {
+			return {
+				valid: false
+			};
+		}
+
+		return {
+			valid: true
+		};
+	}
+}
